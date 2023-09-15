@@ -18,14 +18,14 @@ const createOrder = async(req, res) => {
             headers: {
                 Authorization: `Bearer ${process.env.PAYSTACK_SK}`,
                 'Content-Type': 'application/json'
-            } 
+            }
         }
         )
-        console.log(paymentResponse) 
+        console.log(paymentResponse.data)
         if (paymentResponse.status) {
             const newOrder = await new Order({
                 customer: req.user._id,
-                products: products, 
+                products: products,
                 totalAmount: totalPrice,
                 shippingAddress: address,
                 transactionReference: paymentResponse.data.data.reference
@@ -56,23 +56,21 @@ const verifyOrderPayment = async(req, res) => {
             }
         }
         )
-        if (verifyResponse.status) {
-            if (verifyResponse?.data.status && verifyResponse.data.data.status === "success") {
-                const updateOrder = await Order.findOneAndUpdate({transactionReference: transactionReference}, {
-                    paymentStatus: "paid",
-                    paymentMethod: verifyResponse?.data.data.channel
-                }, {new: true, useFindAndModify: false})
-                if (updateOrder) {
-                    res.json({status: true, message: "Order successfully verified and updated to paid"})
-                } else {
-                    res.json({status: false, message: "Unable to update order to paid"})
-                }
+        // console.log("Transation ref:", transactionReference)
+        // console.log(verifyResponse.data)
+        if (verifyResponse?.data.status && verifyResponse.data.data.status === "success") {
+            const updateOrder = await Order.findOneAndUpdate(
+                { transactionReference: transactionReference }, 
+                { paymentStatus: "paid", 
+                paymentMethod: verifyResponse?.data.data.channel }, 
+                {new: true, useFindAndModify: false})
+            if (updateOrder) {
+                res.json({status: true, message: "Order successfully verified and updated to paid", data: updateOrder})
             } else {
-                res.json({status: false, message: "Payment not verified"})
-            }
-            res.json({status: true, message: "Payment successful", data: verifyResponse})
+                res.json({status: false, message: "Unable to update order to paid"})
+            } 
         } else {
-            res.json({status: false, message: "Unable to verify your payment"})
+            res.json({status: false, message: "Payment not verified"})
         }
     } catch (err) {
         throw new Error(err)
@@ -113,8 +111,8 @@ const userOrders = async(req, res) => {
 const singleOrder = async(req, res) => {
     try {
         const {id} = req.body 
-        const order = await Order.find(id)
-        if (order && order.length > 0) {
+        const order = await Order.findById(id)
+        if (order ) {
             res.json({status: true, message: "Single Order retrieved successfully", data: order})
         } else {
             res.json({status: false, message: "No order found"})
@@ -182,12 +180,12 @@ const cancelOrder = async(req, res) => {
                 isRefunded: false,
             }, {new: true, useFindAndModify: false})
             if (updateToCancel) {
-                res.json({status: true, message: ""})
+                res.json({status: true, message: "Your order has been cancelled"})
             } else {
-                res.json({status: false, message: ""})
+                res.json({status: false, message: "Unable to cancel this order at the moment"})
             }
         } else {
-            res.json({status: false, message: ""})
+            res.json({status: false, message: "Order not found"})
         }
     } catch (err) {
         throw new Error(err)

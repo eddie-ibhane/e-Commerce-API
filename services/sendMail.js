@@ -1,5 +1,4 @@
 import nodemailer from 'nodemailer'
-// const nodemailer = require('nodemailer')
 
 function sendMail(from, to, subject, html){
   let transporter = nodemailer.createTransport({
@@ -34,4 +33,3 @@ function sendMail(from, to, subject, html){
   });
 }
 export default sendMail  
-// module.exports = sendMail

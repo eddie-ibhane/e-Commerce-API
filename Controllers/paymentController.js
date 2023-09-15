@@ -20,7 +20,7 @@ const initiatePayment = async(req, res) => {
         )
         console.log(paymentResponse.data) 
         if (paymentResponse.status) {
-            res.redirect(paymentResponse.data.data.authorization_url)
+            res.redirect(paymentResponse.data.data.authorization_url) 
         } else {
             res.json({status: false, message: "Unable to initialize a payment"})
         }
@@ -41,8 +41,8 @@ const verifyPayment = async(req, res) => {
         }
         )
         // console.log(transactionReference)
-        console.log(verifyResponse.data.data.reference)
-        if (verifyResponse.status){
+        console.log(verifyResponse.data)
+        if (verifyResponse.data.data.status === "success"){
             if (verifyResponse?.data.status && verifyResponse.data.data.status === "success") {
                 // if (verifyResponse.data.status) { 
                 //     // CREATE A NEW ORDER
@@ -52,7 +52,7 @@ const verifyPayment = async(req, res) => {
                 // } else {
                 //     res.json({status: false, message: "Payment not verified"})
                 // }
-                res.json({status: true, message: "Payment successful", data: verifyResponse})
+                res.json({status: true, message: "Payment successful", data: verifyResponse.data})
             } else {
                 res.json({status: false, message: "Payment unsuccessful"}) 
             }

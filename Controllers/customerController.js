@@ -2,6 +2,7 @@ import bcrypt  from "bcrypt";
 import Customer from "../Models/customerModel.js";
 import CustomerWallet from "../Models/customerWalletModel.js"
 import generateToken from "../Utils/generateToken.js"
+import sendMail from "../services/sendMail.js";
 
 const customerRegister = async (req, res) => {
   try {
@@ -18,7 +19,42 @@ const customerRegister = async (req, res) => {
       })
       const saveNewCustomer = await newCustomer.save()
       if (saveNewCustomer) {
-        const newWallet = await new CustomerWallet({
+        const registerHTML = `
+				<!DOCTYPE html>
+				<html lang="en">
+				<head>
+				<meta charset="UTF-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<title>Profile Creation</title>
+				<style>
+					.head{
+					background: blue;
+					color: white;
+					text-align: center;
+					}
+				</style>
+				</head>
+				<body>
+				<div class="head">
+					<h1>Profile Created</h1>
+				</div>
+				<p>Congratulations, your profile have been created, below is your login credentials</p>
+				<ol>
+					<li><strong>Name: </strong> ${saveNewCustomer.name}</li>
+					<li><strong>Email: </strong> ${saveNewCustomer.email}</li>
+					<li><strong>Password: </strong> ${password}</li>
+				</ol>
+				</body>
+				</html>
+			`;
+			sendMail(
+				'"Plural code Commerce" <commerce@xfince.com>',
+				saveNewCustomer.email,
+				"Profile Created",
+				registerHTML
+			);
+
+        const newWallet = await new CustomerWallet({ 
           customer: saveNewCustomer._id
         })
         await newWallet.save()

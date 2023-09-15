@@ -23,7 +23,7 @@ app.use("/api/v1/ecommerce/1394/admin", adminRouter);
 app.use("/api/v1/ecommerce/customer", customerRouter);
 app.use("/api/v1/ecommerce/vendor", vendorRouter);
 app.use("/api/v1/ecommerce/products", productRouter);
-app.use("/api/v1/ecommerce/order", orderRouter);
+app.use("/api/v1/ecommerce/orders", orderRouter);
 app.use("/api/v1/ecommerce/payment", paymentRouter); 
 
 //Middlewares for error handling 
