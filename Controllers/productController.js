@@ -265,53 +265,36 @@ const deleteProduct = async(req, res) => {
     }
 }
 
-/**const initiatePayment = async(req, res) => {
-  try {
-    const {id} = req.body
-    const product = await Product.findById(id)
-    if(product){
-      const paymentResponse = await axios.post("https://api.paystack.co/transaction/initialize", {
-        amount: product.price * 100,
-        email: req.user.email,
-        callback_url: 'http://localhost:5000/api/v1/ecommerce/payment/payment-callback'
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.PAYSTACK_KEY}`,
-          'Content-Type': 'application/json'
+const createProductReview = async(req, res) => {
+    try {
+        const {id, rating, comment} = req.body
+        const product = await Product.findById(id)
+        if(product){
+        const alreadyReviewed = product.reviews.find(r => r.customer.toString() === req.user._id.toString())
+        if(alreadyReviewed){
+            res.json({status: false, message: "Sorry you are only permitted to review once"})
+        }else{
+            const review = {
+            customer: req.user._id,
+            rating,
+            comment,
+            name: req.user.name
+            }
+            product.reviews.push(review)
+            product.rating = product.reviews.reduce((acc, item) => acc + item.rating, 0) / product.reviews.length
+            const saveProduct = await product.save()
+            if(saveProduct){
+            res.json({status: true, message: "Review added", data: saveProduct})
+            }else{
+            res.json({status: false, message: "unable to save review"})
+            }
         }
-      }
-      )
-      if(paymentResponse.status){
-        res.redirect(paymentResponse.data.data.authorization_url)
-      }else{
-        res.json({status: false, message: "unable to initialize a payment"})
-      }
+        }else{
+        res.json({status: false, message: "Product not found"})
+        }
+    } catch (err) {
+        throw new Error(err)
     }
-  } catch (err) {
-    throw new Error(err)
-  }
 }
-const verifyPayment = async(req, res) => {
-  try {
-    // const {} = req.body
-    const transactionReference = req.query.reference
-    const verifyResponse = await axios.get(`https://api.paystack.co/transaction/verify/${transactionReference}`, 
-    {
-      headers: {
-        Authorization: `Bearer ${process.env.PAYSTACK_KEY}`,
-      }
-    })
-    console.log(verifyResponse)
-    if(verifyResponse?.data.status){
-      res.json({status: true, message: "Payment verified"})
-    }else{
-      res.status(400).json({status: false, message: "payment not verified"})
-    }
-    
-  } catch (err) {
-    throw new Error(err)
-  }
-} */
 
-export {createProduct, allProducts, vendorProducts, getSingleProduct, fetchProductByCategory, fetchTopSalesProducts, fetchDiscountedProducts, fetchRelatedProducts, deleteProduct, singleProduct, updateProduct}
+export {createProduct, allProducts, vendorProducts, getSingleProduct, fetchProductByCategory, fetchTopSalesProducts, fetchDiscountedProducts, fetchRelatedProducts, deleteProduct, singleProduct, updateProduct, createProductReview}

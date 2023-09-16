@@ -1,6 +1,6 @@
 import express from 'express'
-import { admin, protect, vendor } from '../Middleware/authMiddleware.js';
-import { allProducts, createProduct, deleteProduct, fetchDiscountedProducts, fetchProductByCategory, fetchRelatedProducts, fetchTopSalesProducts, getSingleProduct, singleProduct, updateProduct, vendorProducts } from '../Controllers/productController.js';
+import { admin, protect, user, vendor } from '../Middleware/authMiddleware.js';
+import { allProducts, createProduct, createProductReview, deleteProduct, fetchDiscountedProducts, fetchProductByCategory, fetchRelatedProducts, fetchTopSalesProducts, getSingleProduct, singleProduct, updateProduct, vendorProducts } from '../Controllers/productController.js';
 
 const router = express.Router();
 
@@ -15,6 +15,7 @@ router.post("/related-products", fetchRelatedProducts)
 router.get("/discounted-products", fetchDiscountedProducts)
 router.put("/update-product", protect, vendor, updateProduct)
 router.delete("/", protect, vendor, deleteProduct)
+router.post("/create-review", protect, user, createProductReview)
 
 
 
